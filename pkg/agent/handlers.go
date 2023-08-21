@@ -126,7 +126,7 @@ func createMessage(taf *taf.Taf) string {
 			if forecast.Visibility >= 9999 {
 				s.WriteString("видимость 10 км и более, ")
 			} else {
-				fmt.Fprintf(&s, "видимость %d км, ", forecast.Visibility)
+				fmt.Fprintf(&s, "видимость %d м, ", forecast.Visibility)
 			}
 		}
 
