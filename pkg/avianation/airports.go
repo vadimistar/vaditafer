@@ -6,7 +6,6 @@ import (
 	"io"
 	"net/http"
 	"net/url"
-	"strconv"
 
 	"github.com/pkg/errors"
 )
@@ -23,8 +22,8 @@ func (c *Client) ClosestAirports(lat float64, lng float64, radialDistance int) (
 	if lng < -180.0 || lng > 180.0 {
 		return nil, fmt.Errorf("longitude value is outside the limits (must be between -180.0 and 180.0): %f", lng)
 	}
-	if radialDistance > 500 {
-		return nil, fmt.Errorf("radial distance is outside the limits (must be >= 500): %d", radialDistance)
+	if radialDistance > 500 || radialDistance <= 0 {
+		return nil, fmt.Errorf("radial distance is outside the limits (must be 0 <= x <= 500): %d", radialDistance)
 	}
 
 	url, err := url.Parse(c.ApiEndpoint)
@@ -37,10 +36,9 @@ func (c *Client) ClosestAirports(lat float64, lng float64, radialDistance int) (
 	q.Set("dataSource", "stations")
 	q.Set("requestType", "retrieve")
 	q.Set("format", "xml")
-	q.Set("radialDistance", strconv.Itoa(radialDistance))
 	url.RawQuery = q.Encode()
 
-	resp, err := http.Get(fmt.Sprintf("%s;%f,%f", url.String(), lng, lat))
+	resp, err := http.Get(fmt.Sprintf("%s&radialDistance=%d;%f,%f", url.String(), radialDistance, lng, lat))
 	if err != nil {
 		return nil, errors.Wrap(err, "cannot access url")
 	}

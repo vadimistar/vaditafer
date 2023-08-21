@@ -48,7 +48,7 @@ func (c *Client) Taf(id string) (t *taf.Taf, err error) {
 	}
 
 	if len(resp.Data) <= 0 {
-		return nil, errors.Wrap(err, "no data")
+		return nil, errors.New("no data")
 	}
 
 	t, err = parseResponse(&resp.Data[0])
@@ -67,22 +67,25 @@ func parseResponse(resp *data) (t *taf.Taf, err error) {
 	}()
 	t = new(taf.Taf)
 
-	t.CreatedAt, err = time.Parse(time.RFC3339, resp.Timestamp.Issued)
+	t.CreatedAt, err = time.Parse(timeLayout, resp.Timestamp.Issued)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse created at")
 	}
 
-	t.From, err = time.Parse(time.RFC3339, resp.Timestamp.From)
+	t.From, err = time.Parse(timeLayout, resp.Timestamp.From)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse from")
 	}
 
-	t.To, err = time.Parse(time.RFC3339, resp.Timestamp.To)
+	t.To, err = time.Parse(timeLayout, resp.Timestamp.To)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse to")
 	}
 
 	t.Forecasts = make([]*taf.Forecast, len(resp.Forecast))
+	for i := range t.Forecasts {
+		t.Forecasts[i] = new(taf.Forecast)
+	}
 	for i, forecast := range resp.Forecast {
 		if forecast.Ceiling.Text != "" {
 			cloudLayer := parseCloudLayer(forecast.Ceiling.BaseMetersAgl, forecast.Ceiling.Code)
@@ -143,6 +146,7 @@ func parseHeader(code string, from string, to string) (header *taf.ChangeHeader,
 	defer func() {
 		err = errors.Wrapf(err, "parse change header: %s", code)
 	}()
+	header = new(taf.ChangeHeader)
 
 	switch code {
 	case "FM":
@@ -153,12 +157,12 @@ func parseHeader(code string, from string, to string) (header *taf.ChangeHeader,
 		header.Kind = "изменение погоды"
 	}
 
-	header.Start, err = time.Parse(time.RFC3339, from)
+	header.Start, err = time.Parse(timeLayout, from)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse from")
 	}
 
-	header.End, err = time.Parse(time.RFC3339, to)
+	header.End, err = time.Parse(timeLayout, to)
 	if err != nil {
 		return nil, errors.Wrap(err, "parse to")
 	}
@@ -185,6 +189,8 @@ func parseCloudLayer(base int, code string) *taf.CloudLayer {
 		Height:   base,
 	}
 }
+
+const timeLayout = "2006-01-02T15:04:05"
 
 type response struct {
 	Data    []data `json:"data"`

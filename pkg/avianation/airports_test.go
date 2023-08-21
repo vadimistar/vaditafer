@@ -22,9 +22,9 @@ func TestClosestAirports(t *testing.T) {
 		url := r.URL
 		q := url.Query()
 		assert.Equal(t, []string{"stations"}, q["dataSource"])
-		assert.Equal(t, []string{"5"}, q["radialDistance"])
+		assert.Equal(t, []string{"retrieve"}, q["requestType"])
 		assert.Equal(t, []string{"xml"}, q["format"])
-		assert.Contains(t, r.URL.String(), "&requestType=retrieve")
+		assert.Contains(t, r.URL.String(), "&radialDistance=5")
 		_, coords, ok := strings.Cut(r.URL.String(), ";")
 		require.True(t, ok)
 		assert.Equal(t, fmt.Sprintf("%f,%f", 80.5, 40.5), coords)

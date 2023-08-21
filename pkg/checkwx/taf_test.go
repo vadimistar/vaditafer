@@ -21,9 +21,9 @@ func TestTaf(t *testing.T) {
 
 	var resp data
 
-	resp.Timestamp.Issued = time.Date(2023, 2, 1, 5, 7, 0, 0, time.UTC).Format(time.RFC3339)
-	resp.Timestamp.From = time.Date(2023, 2, 1, 6, 0, 0, 0, time.UTC).Format(time.RFC3339)
-	resp.Timestamp.To = time.Date(2023, 2, 2, 5, 0, 0, 0, time.UTC).Format(time.RFC3339)
+	resp.Timestamp.Issued = time.Date(2023, 2, 1, 5, 7, 0, 0, time.UTC).Format(timeLayout)
+	resp.Timestamp.From = time.Date(2023, 2, 1, 6, 0, 0, 0, time.UTC).Format(timeLayout)
+	resp.Timestamp.To = time.Date(2023, 2, 2, 5, 0, 0, 0, time.UTC).Format(timeLayout)
 
 	for _, test := range tests {
 		mux.HandleFunc("/taf/ABCD", func(w http.ResponseWriter, r *http.Request) {
