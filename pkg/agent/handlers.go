@@ -97,21 +97,20 @@ func localizeTime(taf *taf.Taf, location string) (err error) {
 
 func createMessage(taf *taf.Taf) string {
 	var s strings.Builder
-	fmt.Fprintf(&s, "**Прогноз создан __%s__**\n**Действует с __%s__ до __%s__**:\n\n", taf.CreatedAt.Format(timeLayout), taf.From.Format(timeLayout), taf.To.Format(timeLayout))
+	fmt.Fprintf(&s, "Прогноз создан %s\nДействует с %s до %s:\n\n", taf.CreatedAt.Format(timeLayout), taf.From.Format(timeLayout), taf.To.Format(timeLayout))
 
 	for i, forecast := range taf.Forecasts {
 		if i != 0 {
 			s.WriteString("\n\n")
 		}
 
-		s.WriteString("**")
 		if forecast.Header.Kind != "" {
 			s.WriteString(capitalize(forecast.Header.Kind) + " ")
 			fmt.Fprintf(&s, "с %s до %s", forecast.Header.Start.Format(timeLayout), forecast.Header.End.Format(timeLayout))
 		} else {
 			fmt.Fprintf(&s, "С %s до %s", forecast.Header.Start.Format(timeLayout), forecast.Header.End.Format(timeLayout))
 		}
-		s.WriteString("**:\n")
+		s.WriteString(":\n")
 
 		var emoji string
 		var p strings.Builder
