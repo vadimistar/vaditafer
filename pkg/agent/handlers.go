@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strings"
 	"time"
+	"unicode"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/pkg/errors"
@@ -96,7 +97,7 @@ func localizeTime(taf *taf.Taf, location string) (err error) {
 
 func createMessage(taf *taf.Taf) string {
 	var s strings.Builder
-	fmt.Fprintf(&s, "**Прогноз создан __%s__\nДействует с __%s__ до __%s__**:\n\n", taf.CreatedAt.Format(timeLayout), taf.From.Format(timeLayout), taf.To.Format(timeLayout))
+	fmt.Fprintf(&s, "**Прогноз создан __%s__**\n**Действует с __%s__ до __%s__**:\n\n", taf.CreatedAt.Format(timeLayout), taf.From.Format(timeLayout), taf.To.Format(timeLayout))
 
 	for i, forecast := range taf.Forecasts {
 		if i != 0 {
@@ -105,42 +106,93 @@ func createMessage(taf *taf.Taf) string {
 
 		s.WriteString("**")
 		if forecast.Header.Kind != "" {
-			s.WriteString(forecast.Header.Kind + " ")
+			s.WriteString(capitalize(forecast.Header.Kind) + " ")
+			fmt.Fprintf(&s, "с %s до %s", forecast.Header.Start.Format(timeLayout), forecast.Header.End.Format(timeLayout))
+		} else {
+			fmt.Fprintf(&s, "С %s до %s", forecast.Header.Start.Format(timeLayout), forecast.Header.End.Format(timeLayout))
 		}
-		fmt.Fprintf(&s, "с %s до %s", forecast.Header.Start.Format(timeLayout), forecast.Header.End.Format(timeLayout))
 		s.WriteString("**:\n")
 
+		var emoji string
+		var p strings.Builder
+
+		for _, w := range forecast.Weather {
+			if emoji == "" {
+				emoji = weatherEmoji(w)
+			}
+			fmt.Fprintf(&p, "%s, ", w)
+		}
+
 		if forecast.Wind != nil && forecast.Wind.Speed != 0 {
-			s.WriteString("ветер ")
+			p.WriteString("ветер ")
 			if forecast.Wind.Direction != "" {
-				s.WriteString(forecast.Wind.Direction + " ")
+				p.WriteString(forecast.Wind.Direction + " ")
 			}
-			fmt.Fprintf(&s, "%d м/c", forecast.Wind.Speed)
+			fmt.Fprintf(&p, "%d м/c", forecast.Wind.Speed)
 			if forecast.Wind.Gusts != 0 {
-				fmt.Fprintf(&s, " (порывы %d м/c)", forecast.Wind.Gusts)
+				fmt.Fprintf(&p, " (порывы %d м/c)", forecast.Wind.Gusts)
 			}
-			s.WriteString(", ")
+			p.WriteString(", ")
 		}
 
 		if forecast.Visibility != 0 {
 			if forecast.Visibility >= 9999 {
-				s.WriteString("видимость 10 км и более, ")
+				p.WriteString("видимость 10 км и более, ")
 			} else {
-				fmt.Fprintf(&s, "видимость %d м, ", forecast.Visibility)
+				fmt.Fprintf(&p, "видимость %d м, ", forecast.Visibility)
 			}
 		}
 
-		for _, w := range forecast.Weather {
-			fmt.Fprintf(&s, "%s, ", w)
-		}
+		cloudEmoji := "☀️"
 
 		for _, cloud := range forecast.CloudLayers {
-			fmt.Fprintf(&s, "%s облачность на высоте %d м, ", cloud.Quantity, cloud.Height)
+			if cloud.Quantity == "сплошная" {
+				cloudEmoji = "☁️"
+			} else {
+				cloudEmoji = "⛅"
+			}
+			fmt.Fprintf(&p, "%s облачность на высоте %d м, ", cloud.Quantity, cloud.Height)
 		}
+
+		if emoji == "" {
+			emoji = cloudEmoji
+		}
+
+		predict := capitalize(strings.TrimSuffix(p.String(), ", "))
+
+		s.WriteString(emoji + predict)
 	}
 
 	result := s.String()
-	return result[:len(result)-2]
+	return result
+}
+
+func capitalize(s string) string {
+	runes := []rune(s)
+	runes[0] = unicode.ToUpper(runes[0])
+	return string(runes)
+}
+
+func weatherEmoji(ww string) string {
+	if strings.Contains(ww, "гроза") {
+		if strings.Contains(ww, "дождь") {
+			return "⛈️"
+		}
+		return "🌩️"
+	}
+	if strings.Contains(ww, "морось") || strings.Contains(ww, "дождь") {
+		return "🌧️"
+	}
+	if strings.Contains(ww, "снег") {
+		return "❄️"
+	}
+	if strings.Contains(ww, "туман") || strings.Contains(ww, "дым") || strings.Contains(ww, "мгла") {
+		return "🌫️"
+	}
+	if strings.Contains(ww, "зерна") || strings.Contains(ww, "град") || strings.Contains(ww, "крупа") {
+		return "🌨️"
+	}
+	return ""
 }
 
 const timeLayout = "02/01 15:04"
