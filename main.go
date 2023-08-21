@@ -9,7 +9,7 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/joho/godotenv"
 	"github.com/pkg/errors"
-	"github.com/vadimistar/yt-audio-bot-serverless/pkg/agent"
+	"github.com/vadimistar/vaditafer/pkg/agent"
 )
 
 func main() {

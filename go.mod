@@ -1,4 +1,4 @@
-module github.com/vadimistar/yt-audio-bot-serverless
+module github.com/vadimistar/vaditafer
 
 go 1.20
 
