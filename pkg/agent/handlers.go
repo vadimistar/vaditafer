@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/pkg/errors"
@@ -34,7 +35,7 @@ func (a *Agent) HandleUpdate(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Agent) SendResponse(update tgbotapi.Update) error {
-	lat, lng, err := a.opencageClient.ForwardGeocode(update.Message.Text)
+	lat, lng, timezone, err := a.opencageClient.ForwardGeocode(update.Message.Text)
 	if err != nil {
 		a.sendMessage(update.Message.From.ID, "Неверный запрос")
 		return errors.Wrap(err, "forward geocode")
@@ -53,6 +54,10 @@ func (a *Agent) SendResponse(update tgbotapi.Update) error {
 			continue
 		}
 
+		if err := localizeTime(taf, timezone); err != nil {
+			return err
+		}
+
 		msg := tgbotapi.NewMessage(update.Message.From.ID, createMessage(taf))
 		msg.ReplyToMessageID = update.Message.MessageID
 		msg.ParseMode = "Markdown"
@@ -63,6 +68,27 @@ func (a *Agent) SendResponse(update tgbotapi.Update) error {
 		}
 
 		break
+	}
+
+	return nil
+}
+
+func localizeTime(taf *taf.Taf, location string) (err error) {
+	defer func() {
+		err = errors.Wrap(err, "localize time")
+	}()
+
+	loc, err := time.LoadLocation(location)
+	if err != nil {
+		return err
+	}
+
+	taf.CreatedAt = taf.CreatedAt.In(loc)
+	taf.From = taf.From.In(loc)
+	taf.To = taf.To.In(loc)
+	for i := range taf.Forecasts {
+		taf.Forecasts[i].Header.Start = taf.Forecasts[i].Header.Start.In(loc)
+		taf.Forecasts[i].Header.End = taf.Forecasts[i].Header.End.In(loc)
 	}
 
 	return nil

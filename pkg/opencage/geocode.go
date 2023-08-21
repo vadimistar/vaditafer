@@ -40,6 +40,11 @@ type response struct {
 }
 
 type result struct {
+	Annotations struct {
+		Timezone struct {
+			Name string `json:"name"`
+		} `json:"timezone"`
+	} `json:"annotations"`
 	Formatted string `json:"formatted"`
 	Geometry  struct {
 		Lat float64 `json:"lat"`

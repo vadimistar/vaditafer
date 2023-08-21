@@ -35,7 +35,7 @@ func TestForwardGeocode(t *testing.T) {
 		require.NoError(t, json.NewEncoder(w).Encode(resp))
 	})
 
-	lat, lng, err := client.ForwardGeocode("Narnia")
+	lat, lng, _, err := client.ForwardGeocode("Narnia")
 	require.NoError(t, err)
 	assert.Equal(t, 20.0, lat)
 	assert.Equal(t, 50.0, lng)

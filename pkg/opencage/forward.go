@@ -6,9 +6,9 @@ import (
 	"github.com/pkg/errors"
 )
 
-func (c *Client) ForwardGeocode(query string) (lat float64, lng float64, err error) {
+func (c *Client) ForwardGeocode(query string) (lat float64, lng float64, timezone string, err error) {
 	if query == "" {
-		return 0, 0, errors.New("empty query")
+		return 0, 0, "", errors.New("empty query")
 	}
 
 	q := make(url.Values)
@@ -17,12 +17,12 @@ func (c *Client) ForwardGeocode(query string) (lat float64, lng float64, err err
 
 	resp, err := c.geocode(q)
 	if err != nil {
-		return 0, 0, err
+		return 0, 0, "", err
 	}
 
 	if len(resp.Results) <= 0 {
-		return 0, 0, errors.New("no results")
+		return 0, 0, "", errors.New("no results")
 	}
 
-	return resp.Results[0].Geometry.Lat, resp.Results[0].Geometry.Lng, nil
+	return resp.Results[0].Geometry.Lat, resp.Results[0].Geometry.Lng, resp.Results[0].Annotations.Timezone.Name, nil
 }
