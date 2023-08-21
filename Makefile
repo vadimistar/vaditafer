@@ -22,6 +22,7 @@ webhook_drop_updates:
 	make webhook_delete
 
 build: webhook_create
+	go test -v ./...
 	docker build -t cr.yandex/$(YC_IMAGE_REGISTRY_ID)/$(SERVERLESS_CONTAINER_NAME) .
 
 push: build
