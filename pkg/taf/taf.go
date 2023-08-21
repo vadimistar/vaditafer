@@ -7,16 +7,7 @@ type Taf struct {
 	From      time.Time
 	To        time.Time
 
-	Wind        *Wind
-	Visibility  int
-	Weather     []string
-	CloudLayers []*CloudLayer
-
-	TempAvailable bool
-	TempMax       int
-	TempMin       int
-
-	Changes []*Change
+	Forecasts []*Forecast
 }
 
 type Wind struct {
@@ -31,8 +22,8 @@ type CloudLayer struct {
 	Kind     string
 }
 
-type Change struct {
-	Header ChangeHeader
+type Forecast struct {
+	Header *ChangeHeader
 
 	Wind        *Wind
 	Visibility  int

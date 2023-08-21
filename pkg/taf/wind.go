@@ -31,7 +31,7 @@ func wind(code string) (w *Wind, err error) {
 		fmfm = "KT"
 	}
 
-	w.Direction, err = direction(ddd)
+	w.Direction, err = ParseWindDirection(ddd)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func wind(code string) (w *Wind, err error) {
 const ktToMps = 0.51
 const kmhToMps = 0.28
 
-func direction(code string) (dir string, err error) {
+func ParseWindDirection(code string) (dir string, err error) {
 	defer func() {
 		err = errors.Wrapf(err, "invalid wind direction group: %s", code)
 	}()

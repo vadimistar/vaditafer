@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func weather(code string) (string, error) {
+func ParseWeather(code string) (string, error) {
 	var (
 		lightIntensity bool
 		denseIntensity bool

@@ -43,7 +43,7 @@ func Test_direction(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.code, func(t *testing.T) {
-			gotDir, err := direction(tt.code)
+			gotDir, err := ParseWindDirection(tt.code)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("direction() error = %v, wantErr %v", err, tt.wantErr)
 				return

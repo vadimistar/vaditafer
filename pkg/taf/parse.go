@@ -53,41 +53,6 @@ func Parse(code string) (taf *Taf, err error) {
 		return nil, errors.New("empty forecast: CNL")
 	}
 
-	taf.Wind, err = wind(groups[index])
-	if err != nil {
-		return nil, err
-	}
-	index++
-
-	if groups[index] == "CAVOK" {
-		taf.Visibility = 9999
-		index++
-	} else {
-		taf.Visibility, err = visibility(groups[index])
-		if err != nil {
-			return nil, err
-		}
-		index++
-
-		for {
-			w, err := weather(groups[index])
-			if err != nil {
-				break
-			}
-			taf.Weather = append(taf.Weather, w)
-			index++
-		}
-
-		for {
-			c, err := cloudLayer(groups[index])
-			if err != nil {
-				break
-			}
-			taf.CloudLayers = append(taf.CloudLayers, c)
-			index++
-		}
-	}
-
 	for index < len(code) {
 	}
 

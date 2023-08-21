@@ -51,7 +51,7 @@ func Test_weather(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.code, func(t *testing.T) {
-			got, err := weather(tt.code)
+			got, err := ParseWeather(tt.code)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("weather() error = %v, wantErr %v", err, tt.wantErr)
 				return
