@@ -7,6 +7,10 @@ import (
 )
 
 func ParseWeather(code string) (string, error) {
+	if code == "NSW" {
+		return "нет погодных явлений", nil
+	}
+
 	var (
 		lightIntensity bool
 		denseIntensity bool
